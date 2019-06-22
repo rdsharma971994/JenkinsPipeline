@@ -1,0 +1,61 @@
+#!/usr/bin/env groovy
+import hudson.model.*
+import hudson.EnvVars
+import groovy.json.JsonSlurperClassic
+import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
+import java.net.URL
+
+node {
+   
+ stage('checkoutFromGit')
+  git 'https://github.com/rdsharma971994/CI-with-Jenkins-in-AWS-Demo.git'
+
+
+ stage('validateProject'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn validate'
+        }
+    }
+
+
+ stage('compileProject'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn compile'
+        }
+    }
+
+
+ stage('reviewTestReport'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn pmd:pmd'
+        }
+    }
+
+ stage('SonarqubeQualityCheck') {
+   withMaven(maven:'MyMaven'){
+        sh 'mvn sonar:sonar -D.sonar.host.url=http://34.93.149.141:9000'
+        }
+    
+     }
+
+ stage('testProject'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn test'
+        }
+    }
+
+ stage('buildProject'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn package'
+        }
+    }
+
+
+ stage('verifyProject'){
+    withMaven(maven:'MyMaven'){
+        sh 'mvn verify'
+        }
+    }
+
+}
